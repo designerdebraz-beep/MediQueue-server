@@ -35,16 +35,119 @@ async function run() {
     const coursecollection = db.collection('course');
 
 
-    app.get('/tutors', logger, async (req, res) => {
-      try {
-        const cursor = coursecollection.find();
-        const result = await cursor.toArray();
-        res.send(result);
-      } catch (error) {
-        res.status(500).send({ message: "Failed to fetch tutors", error: error.message });
-      }
-    });
+    // app.get('/tutors', logger, async (req, res) => {
+    //   try {
+    //     const cursor = coursecollection.find();
+    //     const result = await cursor.toArray();
+    //     res.send(result);
+    //   } catch (error) {
+    //     res.status(500).send({ message: "Failed to fetch tutors", error: error.message });
+    //   }
+    // });
 
+//     app.get('/tutors', logger, async (req, res) => {
+//   try {
+//     const { search, startDate, endDate } = req.query;
+//     let query = {};
+
+//     // ১. নাম অনুযায়ী Case-insensitive $regex সার্চ ফিল্টার
+//     if (search) {
+//       query.name = { $regex: search, $options: 'i' };
+//     }
+
+//     // ২. রেজিস্ট্রেশন ডেট রেঞ্জ ফিল্টার (যদি ইউজার ডেট সিলেক্ট করে)
+//     if (startDate || endDate) {
+//       query.createdAt = {};
+//       if (startDate) {
+//         query.createdAt.$gte = new Date(startDate);
+//       }
+//       if (endDate) {
+//         // ঐ দিনের শেষ মুহূর্ত পর্যন্ত ধরার জন্য সময় সেট করে দেওয়া হলো
+//         const end = new Date(endDate);
+//         end.setHours(23, 59, 59, 999);
+//         query.createdAt.$lte = end;
+//       }
+//     }
+
+//     // আপনার কালেকশন অনুযায়ী সার্চ করা হচ্ছে
+//     const courseCollection = client.db('MediQueue').collection('tutors');
+//     const result = await courseCollection.find(query).sort({ createdAt: -1 }).toArray();
+    
+//     res.send(result);
+//   } catch (error) {
+//     console.error("Fetch tutors error:", error);
+//     res.status(500).send({ message: "Failed to fetch tutors", error: error.message });
+//   }
+// });
+
+
+// app.get('/tutors', logger, async (req, res) => {
+//   try {
+//     const { search, startDate, endDate } = req.query;
+//     let query = {};
+
+//     // যদি ইউজার সার্চ বক্সে কিছু লেখে, শুধু তখনই $regex ফিল্টার যোগ হবে
+//     if (search && search.trim() !== "") {
+//       query.name = { $regex: search, $options: 'i' };
+//     }
+
+//     // রেজিস্ট্রেশন ডেট ফিল্টার (যদি সিলেক্ট করা হয়)
+//     if (startDate || endDate) {
+//       query.createdAt = {};
+//       if (startDate) {
+//         query.createdAt.$gte = new Date(startDate);
+//       }
+//       if (endDate) {
+//         const end = new Date(endDate);
+//         end.setHours(23, 59, 59, 999);
+//         query.createdAt.$lte = end;
+//       }
+//     }
+
+//     const courseCollection = client.db('MediQueue').collection('tutors');
+//     // সব ডেটা একসাথে নিয়ে আসবে এবং লেটেস্টগুলো আগে দেখাবে
+//     const result = await courseCollection.find(query).sort({ createdAt: -1 }).toArray();
+    
+//     res.send(result);
+//   } catch (error) {
+//     console.error("Fetch tutors error:", error);
+//     res.status(500).send({ message: "Failed to fetch tutors", error: error.message });
+//   }
+// });
+
+app.get('/tutors', logger, async (req, res) => {
+  try {
+    const { search, startDate, endDate } = req.query;
+    let query = {};
+
+    // ১. কেস-ইনসেনসিটিভ সার্চ (শুধুমাত্র ভ্যালু থাকলেই কুয়েরিতে ঢুকবে)
+    if (search && search.trim() !== "" && search !== "undefined") {
+      query.name = { $regex: search, $options: 'i' };
+    }
+
+    // ২. ডেট ফিল্টার (ভ্যালু চেক করে কন্ডিশনাল সেটআপ)
+    if ((startDate && startDate !== "undefined") || (endDate && endDate !== "undefined")) {
+      query.createdAt = {};
+      if (startDate && startDate !== "undefined") {
+        query.createdAt.$gte = new Date(startDate);
+      }
+      if (endDate && endDate !== "undefined") {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        query.createdAt.$lte = end;
+      }
+    }
+
+    // আপনার কালেকশন ভেরিয়েবল অনুযায়ী ডেটা খোঁজা হচ্ছে
+    // যদি query অবজেক্ট খালি থাকে {}, তাহলে মঙ্গোডিবি স্বয়ংক্রিয়ভাবে সব ডেটা (All Data) নিয়ে আসবে
+    const result = await coursecollection.find(query).toArray();
+    
+    res.send(result);
+  } catch (error) {
+    console.error("Fetch error:", error);
+    res.status(500).send({ message: "Failed to fetch tutors", error: error.message });
+  }
+});
    
     app.get('/featured', async (req, res) => {
       try {
