@@ -120,7 +120,7 @@ app.get('/tutors', logger, async (req, res) => {
     const { search, startDate, endDate } = req.query;
     let query = {};
 
-  
+  // add search function on the backend
     if (search && search.trim() !== "" && search !== "undefined") {
       query.name = { $regex: search, $options: 'i' };
     }
