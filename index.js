@@ -120,12 +120,11 @@ app.get('/tutors', logger, async (req, res) => {
     const { search, startDate, endDate } = req.query;
     let query = {};
 
-    // ১. কেস-ইনসেনসিটিভ সার্চ (শুধুমাত্র ভ্যালু থাকলেই কুয়েরিতে ঢুকবে)
+  
     if (search && search.trim() !== "" && search !== "undefined") {
       query.name = { $regex: search, $options: 'i' };
     }
 
-    // ২. ডেট ফিল্টার (ভ্যালু চেক করে কন্ডিশনাল সেটআপ)
     if ((startDate && startDate !== "undefined") || (endDate && endDate !== "undefined")) {
       query.createdAt = {};
       if (startDate && startDate !== "undefined") {
@@ -138,8 +137,7 @@ app.get('/tutors', logger, async (req, res) => {
       }
     }
 
-    // আপনার কালেকশন ভেরিয়েবল অনুযায়ী ডেটা খোঁজা হচ্ছে
-    // যদি query অবজেক্ট খালি থাকে {}, তাহলে মঙ্গোডিবি স্বয়ংক্রিয়ভাবে সব ডেটা (All Data) নিয়ে আসবে
+   
     const result = await coursecollection.find(query).toArray();
     
     res.send(result);
@@ -160,7 +158,7 @@ app.get('/tutors', logger, async (req, res) => {
     });
 
 
-    // ৬. ডাটাবেজ থেকে সব বুকিং ডেটা নিয়ে আসার রুট
+  
     // app.get('/bookings', async (req, res) => {
     //   try {
     //     const bookingsCollection = db.collection('bookings');
@@ -219,7 +217,6 @@ app.delete('/tutors/:id', async (req, res) => {
   }
 });
 
-// 🛠️ টিউটরের ডেটা আপডেট করার জন্য PUT API রুট
 app.put('/tutors/:id', async (req, res) => {
   try {
     const id = req.params.id;
@@ -258,8 +255,7 @@ app.put('/tutors/:id', async (req, res) => {
   }
 });
 
-// ৯. নির্দিষ্ট ইউজারের ইমেইল অনুযায়ী টিউটরদের ডেটা ফিল্টার করে নিয়ে আসার রুট
-   // ১. নতুন টিউটর ইনসার্ট করার সময় একটি নির্দিষ্ট ফ্ল্যাগ (isMyTutor) সেট করা
+
     app.post('/tutors', async (req, res) => {
       try {
         const tutorData = req.body;
@@ -324,7 +320,7 @@ app.put('/tutors/:id', async (req, res) => {
       }
     });
 
-    // ৫. নতুন বুকিং তৈরি (Default Status: Confirmed)
+   
     app.post('/bookings', async (req, res) => {
       const bookingData = req.body; 
       const { tutorId } = bookingData;
@@ -364,7 +360,7 @@ app.put('/tutors/:id', async (req, res) => {
       }
     });
 
-    // ৮. নতুন টিউটর ডাটাবেজে ইনসার্ট করার রুট
+   
     app.post('/tutors', async (req, res) => {
       try {
         const tutorData = req.body;
@@ -398,7 +394,6 @@ app.put('/tutors/:id', async (req, res) => {
       }
     });
 
-    // ৭. বুকিং ডিলিট না করে স্ট্যাটাস "cancelled" করার PATCH রুট
     app.patch('/bookings/:id/cancel', async (req, res) => {
       const { id } = req.params;
 
