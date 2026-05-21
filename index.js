@@ -62,75 +62,8 @@ async function run() {
     //   }
     // });
 
-//     app.get('/tutors', logger, async (req, res) => {
-//   try {
-//     const { search, startDate, endDate } = req.query;
-//     let query = {};
-
-//     // ১. নাম অনুযায়ী Case-insensitive $regex সার্চ ফিল্টার
-//     if (search) {
-//       query.name = { $regex: search, $options: 'i' };
-//     }
-
-//     // ২. রেজিস্ট্রেশন ডেট রেঞ্জ ফিল্টার (যদি ইউজার ডেট সিলেক্ট করে)
-//     if (startDate || endDate) {
-//       query.createdAt = {};
-//       if (startDate) {
-//         query.createdAt.$gte = new Date(startDate);
-//       }
-//       if (endDate) {
-//         // ঐ দিনের শেষ মুহূর্ত পর্যন্ত ধরার জন্য সময় সেট করে দেওয়া হলো
-//         const end = new Date(endDate);
-//         end.setHours(23, 59, 59, 999);
-//         query.createdAt.$lte = end;
-//       }
-//     }
-
-//     // আপনার কালেকশন অনুযায়ী সার্চ করা হচ্ছে
-//     const courseCollection = client.db('MediQueue').collection('tutors');
-//     const result = await courseCollection.find(query).sort({ createdAt: -1 }).toArray();
-    
-//     res.send(result);
-//   } catch (error) {
-//     console.error("Fetch tutors error:", error);
-//     res.status(500).send({ message: "Failed to fetch tutors", error: error.message });
-//   }
-// });
 
 
-// app.get('/tutors', logger, async (req, res) => {
-//   try {
-//     const { search, startDate, endDate } = req.query;
-//     let query = {};
-
-//     // যদি ইউজার সার্চ বক্সে কিছু লেখে, শুধু তখনই $regex ফিল্টার যোগ হবে
-//     if (search && search.trim() !== "") {
-//       query.name = { $regex: search, $options: 'i' };
-//     }
-
-//     // রেজিস্ট্রেশন ডেট ফিল্টার (যদি সিলেক্ট করা হয়)
-//     if (startDate || endDate) {
-//       query.createdAt = {};
-//       if (startDate) {
-//         query.createdAt.$gte = new Date(startDate);
-//       }
-//       if (endDate) {
-//         const end = new Date(endDate);
-//         end.setHours(23, 59, 59, 999);
-//         query.createdAt.$lte = end;
-//       }
-//     }
-
-//     const courseCollection = client.db('MediQueue').collection('tutors');
-//     // সব ডেটা একসাথে নিয়ে আসবে এবং লেটেস্টগুলো আগে দেখাবে
-//     const result = await courseCollection.find(query).sort({ createdAt: -1 }).toArray();
-    
-//     res.send(result);
-//   } catch (error) {
-//     console.error("Fetch tutors error:", error);
-//     res.status(500).send({ message: "Failed to fetch tutors", error: error.message });
-//   }
-// });
 
 app.get('/tutors',  async (req, res) => {
   try {
@@ -163,6 +96,29 @@ app.get('/tutors',  async (req, res) => {
     res.status(500).send({ message: "Failed to fetch tutors", error: error.message });
   }
 });
+
+ app.get('/tutors/:id',  async (req, res) => {
+      const { id } = req.params;
+      
+      try {
+        // মঙ্গোডিবির আইডি ObjectId অথবা String দুইভাবেই থাকতে পারে, তাই $or অপারেটর ব্যবহার করছি
+        const query = {
+          $or: [
+            { _id: id },
+            ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : [])
+          ]
+        };
+
+        const result = await coursecollection.findOne(query);
+        
+        if (!result) {
+          return res.status(404).send({ message: "Tutor not found in database" });
+        }
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Error fetching tutor details", error: error.message });
+      }
+    });
    
     app.get('/featured', async (req, res) => {
       try {
@@ -176,40 +132,7 @@ app.get('/tutors',  async (req, res) => {
 
 
   
-    // app.get('/bookings', async (req, res) => {
-    //   try {
-    //     const bookingsCollection = db.collection('bookings');
-        
-    //     // সব বুকিং ডেটা অবজেক্ট আকারে নিয়ে এসে অ্যারেতে কনভার্ট করা এবং লেটেস্ট বুকিং আগে দেখানো
-    //     const result = await bookingsCollection.find().sort({ bookedAt: -1 }).toArray();
-        
-    //     res.status(200).send(result);
-    //   } catch (error) {
-    //     console.error("Fetch bookings error:", error);
-    //     res.status(500).send({ message: "Failed to fetch bookings", error: error.message });
-    //   }
-    // });
   
-
-// ৯. ডাটাবেজ থেকে সব টিউটরদের ডেটা নিয়ে আসার রুট
-    // app.get('/tutors', async (req, res) => {
-    //   try {
-    //     const courseCollection = client.db('MediQueue').collection('tutors');
-        
-    //     // সব টিউটর নিয়ে এসে অ্যারেতে কনভার্ট করা এবং নতুন টিউটরদের আগে দেখানো
-    //     const result = await courseCollection.find({}).sort({ createdAt: -1 }).toArray();
-        
-    //     res.status(200).json(result);
-    //   } catch (error) {
-    //     console.error("Fetch tutors backend error:", error);
-    //     res.status(500).json({ 
-    //       success: false, 
-    //       message: "Failed to fetch tutors", 
-    //       error: error.message 
-    //     });
-    //   }
-    // });
-
 app.delete('/tutors/:id',  async (req, res) => {
   try {
     const id = req.params.id;
@@ -442,171 +365,9 @@ app.put('/tutors/:id', async (req, res) => {
       }
     });
    
-    app.get('/tutors/:id',  async (req, res) => {
-      const { id } = req.params;
-      
-      try {
-        // মঙ্গোডিবির আইডি ObjectId অথবা String দুইভাবেই থাকতে পারে, তাই $or অপারেটর ব্যবহার করছি
-        const query = {
-          $or: [
-            { _id: id },
-            ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : [])
-          ]
-        };
-
-        const result = await coursecollection.findOne(query);
-        
-        if (!result) {
-          return res.status(404).send({ message: "Tutor not found in database" });
-        }
-        res.send(result);
-      } catch (error) {
-        res.status(500).send({ message: "Error fetching tutor details", error: error.message });
-      }
-    });
+   
 
 
-  //  app.patch('/tutors/:id/decrease-slot', async (req, res) => {
-  //     const { id } = req.params;
-      
-  //     try {
-  //       const query = {
-  //         $or: [
-  //           { _id: id },
-  //           ...(ObjectId.isValid(id) ? [{ _id: new ObjectId(id) }] : [])
-  //         ]
-  //       };
-
-  //       // প্রথমে টিউটর খুঁজে বের করি
-  //       const tutor = await coursecollection.findOne(query);
-
-  //       if (!tutor) {
-  //         return res.status(404).json({ message: "Tutor not found" });
-  //       }
-
-  //       // remainingSlots ডেটা টাইপ সেফটি এনশিওর করা
-  //       const currentSlots = parseInt(tutor.remainingSlots, 10);
-
-  //       if (isNaN(currentSlots) || currentSlots <= 0) {
-  //         return res.status(400).json({ message: "No slots available or invalid slot count" });
-  //       }
-
-  //       // ভ্যালু আপডেট করা
-  //       const result = await coursecollection.findOneAndUpdate(
-  //         query,
-  //         { $set: { remainingSlots: currentSlots - 1 } },
-  //         { returnDocument: 'after' }
-  //       );
-
-  //       res.status(200).json(result);
-  //     } catch (error) {
-  //       console.error("Update error:", error);
-  //       res.status(500).json({ message: "Failed to update slot", error: error.message });
-  //     }
-  //   });
-
-
-  // app.post('/bookings', async (req, res) => {
-  //     const bookingData = req.body; // ফ্রন্টএন্ড থেকে পাঠানো ডেটা
-  //     const { tutorId } = bookingData;
-
-  //     try {
-  //       // কালেকশন তৈরি বা সিলেক্ট করা (MediQueue ডাটাবেজের অধীনে 'bookings' কালেকশন)
-  //       const bookingsCollection = db.collection('bookings');
-
-  //       // স্টেপ ১: বুকিংয়ের সব ডেটা নতুন ডকুমেন্ট হিসেবে ইনসার্ট করা
-  //       const insertResult = await bookingsCollection.insertOne({
-  //         ...bookingData,
-  //         bookedAt: new Date() // বুকিংয়ের সময় ট্র্যাকিংয়ের জন্য
-  //       });
-
-  //       // স্টেপ ২: বুকিং সফল হলে ওই টিউটরের স্লট ১ কমিয়ে দেওয়া
-  //       let query;
-  //       try {
-  //         query = { _id: new ObjectId(tutorId) };
-  //       } catch (err) {
-  //         query = { _id: tutorId };
-  //       }
-
-  //       const tutor = await coursecollection.findOne(query);
-  //       if (tutor) {
-  //         const currentSlots = parseInt(tutor.remainingSlots, 10);
-  //         if (!isNaN(currentSlots) && currentSlots > 0) {
-  //           await coursecollection.findOneAndUpdate(
-  //             query,
-  //             { $set: { remainingSlots: currentSlots - 1 } }
-  //           );
-  //         }
-  //       }
-
-  //       // ফ্রন্টএন্ডে রেসপন্স পাঠানো
-  //       res.status(201).json({ 
-  //         success: true, 
-  //         message: "Booking data inserted and slot updated successfully!",
-  //         bookingId: insertResult.insertedId 
-  //       });
-
-  //     } catch (error) {
-  //       console.error("Booking error:", error);
-  //       res.status(500).json({ success: false, message: "Failed to complete booking", error: error.message });
-  //     }
-  //   });
-
-  // ৫. নতুন বুকিং ডাটাবেজে ইনসার্ট করার এবং স্লট কমানোর ১০০% ফুল-প্রুফ রুট
-    app.post('/bookings', async (req, res) => {
-      const bookingData = req.body; 
-      const { tutorId } = bookingData;
-
-      try {
-        const bookingsCollection = db.collection('bookings');
-
-        // স্টেপ ১: বুকিংয়ের সব ডেটা নতুন ডকুমেন্ট হিসেবে ইনসার্ট করা
-        const insertResult = await bookingsCollection.insertOne({
-          ...bookingData,
-          bookedAt: new Date() 
-        });
-
-        // স্টেপ ২: আইডি ObjectId নাকি String তা নিশ্চিত করতে $or কুয়েরি তৈরি
-        const query = {
-          $or: [
-            { _id: tutorId },
-            ...(ObjectId.isValid(tutorId) ? [{ _id: new ObjectId(tutorId) }] : [])
-          ]
-        };
-
-        // টিউটর খুঁজে বের করা
-        const tutor = await coursecollection.findOne(query);
-
-        if (tutor) {
-          // ডাটাবেজের ফিল্ডে স্লট সংখ্যা টাইপ সেফটি নিশ্চিত করা
-          const currentSlots = parseInt(tutor.remainingSlots, 10);
-
-          if (!isNaN(currentSlots) && currentSlots > 0) {
-            // মঙ্গোডিবি অফিশিয়াল ড্রাইভারের findOneAndUpdate মেথড
-            await coursecollection.findOneAndUpdate(
-              query,
-              { $set: { remainingSlots: currentSlots - 1 } }
-            );
-            console.log(`Slot successfully decreased for tutor: ${tutor.name}`);
-          } else {
-            console.log("Slot count is invalid or already 0");
-          }
-        } else {
-          console.log(`Tutor not found with ID: ${tutorId}`);
-        }
-
-        // ফ্রন্টএন্ডে সাকসেস রেসপন্স
-        res.status(201).json({ 
-          success: true, 
-          message: "Booking confirmed and slot updated!",
-          bookingId: insertResult.insertedId 
-        });
-
-      } catch (error) {
-        console.error("Booking server error:", error);
-        res.status(500).json({ success: false, message: "Failed to complete booking", error: error.message });
-      }
-    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
