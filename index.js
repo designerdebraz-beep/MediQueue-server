@@ -22,7 +22,7 @@ const client = new MongoClient(uri, {
   }
 });
 
-// const JWKS = createRemoteJWKSet(new URL(`${process.env.NEXT_PUBLIC_URL}/api/auth/jwks`));
+// const JWKS = createRemoteJWKSet(new URL(`${process.env.CLIENT_URL}/api/auth/jwks`));
 
 // const verifyToken = async (req, res, next) => {
 //   const authHeader = req?.headers.authorization;
@@ -46,7 +46,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server
-    await client.connect();
+    // await client.connect();
 
     const db = client.db('MediQueue');
     const coursecollection = db.collection('course');
@@ -63,7 +63,15 @@ async function run() {
     // });
 
 
-
+ app.get('/featured', async (req, res) => {
+      try {
+        const cursor = coursecollection.find().limit(6);
+        const result = await cursor.toArray();
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: "Failed to fetch featured tutors", error: error.message });
+      }
+    });
 
 app.get('/tutors',  async (req, res) => {
   try {
@@ -101,7 +109,7 @@ app.get('/tutors',  async (req, res) => {
       const { id } = req.params;
       
       try {
-        // মঙ্গোডিবির আইডি ObjectId অথবা String দুইভাবেই থাকতে পারে, তাই $or অপারেটর ব্যবহার করছি
+        
         const query = {
           $or: [
             { _id: id },
@@ -120,15 +128,7 @@ app.get('/tutors',  async (req, res) => {
       }
     });
    
-    app.get('/featured', async (req, res) => {
-      try {
-        const cursor = coursecollection.find().limit(6);
-        const result = await cursor.toArray();
-        res.send(result);
-      } catch (error) {
-        res.status(500).send({ message: "Failed to fetch featured tutors", error: error.message });
-      }
-    });
+   
 
 
   
@@ -370,7 +370,7 @@ app.put('/tutors/:id', async (req, res) => {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } catch (error) {
     console.error("MongoDB Connection/Run Error:", error);
