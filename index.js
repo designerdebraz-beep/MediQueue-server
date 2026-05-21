@@ -5,6 +5,7 @@ const port = process.env.PORT || 8080;
 const dotenv = require("dotenv");
 dotenv.config();
 const cors = require('cors');
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 
 // Middleware
 app.use(cors());
@@ -21,10 +22,26 @@ const client = new MongoClient(uri, {
   }
 });
 
-const logger = (req, res, next) => {
-  console.log(`${req.method} | ${req.url}`);
-  next();
-};
+// const JWKS = createRemoteJWKSet(new URL(`${process.env.NEXT_PUBLIC_URL}/api/auth/jwks`));
+
+// const verifyToken = async (req, res, next) => {
+//   const authHeader = req?.headers.authorization;
+//   if (!authHeader) {
+//     return res.status(401).json({ message: "Unauthorized" });
+//   }
+//   const token = authHeader.split(" ")[1];
+//   if (!token) {
+//     return res.status(401).json({ message: "Unauthorized" });
+//   }
+
+//   try {
+//     const { payload } = await jwtVerify(token, JWKS);
+//     console.log(payload);
+//     next();
+//   } catch (error) {
+//     return res.status(403).json({ message: "Forbidden" });
+//   }
+// };
 
 async function run() {
   try {
@@ -115,7 +132,7 @@ async function run() {
 //   }
 // });
 
-app.get('/tutors', logger, async (req, res) => {
+app.get('/tutors',  async (req, res) => {
   try {
     const { search, startDate, endDate } = req.query;
     let query = {};
@@ -193,17 +210,17 @@ app.get('/tutors', logger, async (req, res) => {
     //   }
     // });
 
-app.delete('/tutors/:id', async (req, res) => {
+app.delete('/tutors/:id',  async (req, res) => {
   try {
     const id = req.params.id;
     
-    // মঙ্গোডিবির কালেকশন সিলেক্ট করা (যেখানে আপনার টিউটরদের ডেটা জমা হচ্ছে)
+    
     const courseCollection = client.db('MediQueue').collection('tutors');
     
-    // মঙ্গোডিবি কুয়েরি অবজেক্ট তৈরি
+   
     const query = { _id: new ObjectId(id) };
     
-    // tutorsCollection এর বদলে সঠিক ভেরিয়েবল courseCollection ব্যবহার করা হলো
+    
     const result = await courseCollection.deleteOne(query);
     
     if (result.deletedCount === 1) {
@@ -425,7 +442,7 @@ app.put('/tutors/:id', async (req, res) => {
       }
     });
    
-    app.get('/tutors/:id', async (req, res) => {
+    app.get('/tutors/:id',  async (req, res) => {
       const { id } = req.params;
       
       try {
@@ -611,3 +628,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`MediQueue app listening on port ${port}`);
 });
+
+
